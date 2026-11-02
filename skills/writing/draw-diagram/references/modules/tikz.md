@@ -7,6 +7,7 @@ LaTeX 문서에 들어가는 그림. 들어갈 곳이 LaTeX면 묻지 않고 이
 - LaTeX 문서 안: `figure` 환경 안에 `tikzpicture`를 직접 넣음. 문서 전처리부에 `\usepackage{tikz}`와 `\input{tikz-styles.tex}` 추가
 - 단독 그림: `\documentclass[tikz,border=4pt]{standalone}`. 엔진은 XeLaTeX. 글꼴은 그림이 들어갈 문서와 같게 (write-docs 문서면 그 전처리부의 글꼴 설정을 그대로 가져옴)
 - 전달: `.tex` + `.pdf`. 요청하면 PNG도 (`pdftoppm -png -r 300`)
+- 이미지로 내보낼 때(Markdown 문서 등)는 `tikzpicture` 맨 끝에서 `\dgCanvas`로 흰 바탕을 깖. 자세한 것은 `modules/markdown.md`
 
 ## 스타일
 

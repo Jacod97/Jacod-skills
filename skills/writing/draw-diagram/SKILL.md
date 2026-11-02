@@ -37,6 +37,7 @@ assets/                         스타일 원본 (복사해서 씀)
 |---|---|---|
 | LaTeX 문서 | TikZ | `modules/tikz.md` |
 | HTML 문서 | 인라인 SVG | `modules/svg.md` |
+| Markdown 문서 | 이미지 파일(SVG, 필요하면 PNG) + md 링크. 소스는 수식 기호가 있으면 TikZ, 없으면 SVG | `modules/markdown.md` + 소스 도구 모듈 |
 
 - LaTeX 문서에 들어가면 묻지 않고 TikZ를 쓴다.
 - 들어갈 곳이 분명하면 묻지 않고 그 도구를 쓴다.

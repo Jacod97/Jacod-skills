@@ -52,3 +52,13 @@
   namelabel/.style={font=\sffamily\small\bfseries, inner sep=1pt},
   panellabel/.style={font=\sffamily\small\bfseries, anchor=north west, inner sep=0pt},
 }
+
+% 흰 바탕: 이미지로 내보낼 때(Markdown 등) tikzpicture 끝에서 \dgCanvas 호출.
+% background 층보다 아래(canvas 층)에 깔아서 컨테이너를 가리지 않음. 다크 모드에서도 보이게 함.
+\pgfdeclarelayer{canvas}
+\pgfsetlayers{canvas,background,main}
+\newcommand{\dgCanvas}[1][3mm]{%
+  \begin{pgfonlayer}{canvas}
+    \fill[white] ([shift={(-#1,-#1)}]current bounding box.south west)
+      rectangle ([shift={(#1,#1)}]current bounding box.north east);
+  \end{pgfonlayer}}
