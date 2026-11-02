@@ -1,0 +1,54 @@
+% draw-diagram TikZ 스타일. \input으로 불러서 씀. 원본은 수정하지 않음.
+\usetikzlibrary{positioning,arrows.meta,fit,calc,backgrounds,shapes.geometric}
+
+% 팔레트 (assets/palette.md와 같은 값)
+\definecolor{dgBlue}{HTML}{BFDFFB}
+\definecolor{dgOrange}{HTML}{FBD2B4}
+\definecolor{dgMint}{HTML}{C7F5EC}
+\definecolor{dgPurple}{HTML}{DCD3F9}
+\definecolor{dgYellow}{HTML}{FBEBB4}
+\definecolor{dgGreen}{HTML}{D3EDC8}
+\definecolor{dgPink}{HTML}{F9D1F0}
+\definecolor{dgGray}{HTML}{D9D9D9}
+\definecolor{dgPanel}{HTML}{F2F2F2}
+\definecolor{dgLine}{HTML}{404040}
+
+\tikzset{
+  every picture/.append style={line width=0.6pt, draw=dgLine, text=dgLine,
+    font=\sffamily},
+  % 모듈: 채운 둥근 사각형, 테두리 없음. 색은 fill=dgXxx로 지정
+  module/.style={draw=none, rounded corners=3pt, minimum height=7mm,
+    minimum width=24mm, align=center, font=\sffamily\small},
+  % 데이터: 흰 바탕 얇은 테두리
+  data/.style={draw=dgLine, fill=white, rounded corners=2pt, line width=0.4pt,
+    minimum height=7mm, inner sep=3pt, align=center, font=\sffamily\small},
+  % 스칼라·변수: 원
+  scalar/.style={circle, draw=dgLine, line width=0.4pt, fill=dgPink,
+    minimum size=6mm, inner sep=0pt, font=\sffamily\small},
+  % 변수 칩: 작은 사각형 + 기호
+  chip/.style={draw=none, rounded corners=2pt, minimum size=6mm,
+    inner sep=1pt, font=\sffamily\small},
+  % 연산 글리프: 원 안의 기호 (+, \times, \odot 등)
+  op/.style={circle, draw=dgLine, line width=0.4pt, fill=white,
+    minimum size=4.5mm, inner sep=0pt, font=\sffamily\footnotesize},
+  % 차원 축소 층: 사다리꼴. 좁아지는 쪽이 출력 (shape border rotate로 방향 조정)
+  reduce/.style={trapezium, trapezium angle=75, shape border rotate=270,
+    draw=dgLine, line width=0.4pt, fill=dgGray, minimum height=5mm,
+    minimum width=12mm, inner sep=1pt, font=\sffamily\footnotesize},
+  % 분기: 마름모
+  branch/.style={diamond, draw=none, fill=dgLine, minimum size=3.5mm, inner sep=0pt},
+  % 컨테이너: fit=(...)과 함께 background 층에
+  container/.style={draw=none, fill=dgPanel, rounded corners=6pt, inner sep=3mm},
+  % 반복 경계: 점선 컨테이너
+  repeatbox/.style={draw=dgLine!50, dashed, fill=dgPanel, rounded corners=6pt,
+    inner sep=3mm},
+  % 선
+  flow/.style={-{Stealth[length=2mm]}, draw=dgLine},
+  ref/.style={-{Stealth[length=2mm]}, dashed},          % 참조: color=출발 색 진하게
+  zoom/.style={draw=dgLine!45, dashed, line width=0.4pt}, % 확대선
+  skip/.style={densely dotted, draw=dgLine},              % 생략
+  % 입출력 아래 두 줄: 기호 줄, 이름 줄
+  symlabel/.style={font=\normalsize, inner sep=1pt},
+  namelabel/.style={font=\sffamily\small\bfseries, inner sep=1pt},
+  panellabel/.style={font=\sffamily\small\bfseries, anchor=north west, inner sep=0pt},
+}
