@@ -1,0 +1,55 @@
+% 기본 서식 (리뷰, 참조 문서). 작업 폴더로 복사해 <...> 자리표시를 모두 바꾼다.
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{xetexko}
+\setmainfont{Noto Serif CJK KR}
+\setsansfont{Noto Sans CJK KR}
+\setmonofont[Scale=0.85]{DejaVu Sans Mono}
+\setmainhangulfont{Noto Serif CJK KR}
+\setsanshangulfont{Noto Sans CJK KR}
+\setmonohangulfont[Scale=0.85]{Noto Sans CJK KR}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage[margin=25mm,headheight=14pt]{geometry}
+\usepackage{graphicx,booktabs,array,tabularx,float,xcolor,enumitem,fancyvrb,fancyhdr,titlesec}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{xurl}
+\usepackage[hidelinks]{hyperref}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\linespread{1.25}
+\setlength{\emergencystretch}{2em}
+\setlength{\parskip}{0.4em}
+\setlength{\parindent}{0pt}
+\newcommand{\code}[1]{\path{#1}}
+\urlstyle{tt}
+\definecolor{headblue}{RGB}{31,73,125}
+\titleformat{\section}{\sffamily\Large\bfseries\color{headblue}}{\thesection.}{0.6em}{}
+\titleformat{\subsection}{\sffamily\large\bfseries}{\thesubsection}{0.6em}{}
+\titleformat{\subsubsection}{\sffamily\normalsize\bfseries}{\thesubsubsection}{0.6em}{}
+\renewcommand{\figurename}{그림}
+\renewcommand{\tablename}{표}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\sffamily\small <문서 제목>}
+\fancyfoot[C]{\small\thepage}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.15em,topsep=0.3em}
+\newenvironment{symbols}
+  {\vspace{-0.4em}\begin{itemize}[leftmargin=3em,itemsep=0.05em,topsep=0.2em]}
+  {\end{itemize}\vspace{0.6em}}
+\newenvironment{terms}
+  {\par\vspace{0.1em}\noindent{\small\sffamily ※ 용어 설명}\par\vspace{-0.3em}\small
+   \begin{itemize}[leftmargin=2.5em,itemsep=0.05em,topsep=0.2em,label=--]}
+  {\end{itemize}\normalsize\vspace{0.4em}}
+\fvset{fontsize=\small,frame=single,framesep=3mm,rulecolor=\color{gray!50}}
+
+\begin{document}
+
+\begin{center}
+  {\sffamily\LARGE\bfseries <문서 제목>\par}
+  \vspace{0.8em}
+  {\small 작성일: <날짜> \quad|\quad 기준: <출처>\par}
+\end{center}
+
+\section{<장 제목>}
+<본문>
+
+\end{document}

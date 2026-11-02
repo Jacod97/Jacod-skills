@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연구일지</title>
+<!--
+================================================================
+  사용 규칙 (AI 에이전트용)
+================================================================
+  [양식]
+  - 아래 <style>과 하단 <script>는 수정하지 않는다. 인라인 style, 새 class,
+    아이콘, 이모지, 색 박스, 배지를 추가하지 않는다.
+  - 쓸 수 있는 요소는 이 파일에 있는 것뿐이다:
+      제목 블록     <header class="title-block">
+      대제목        <h2>  (번호: 1. 2. 3.)
+      소제목        <h3>  (번호: 1.1 1.2)
+      세부제목      <h4>  (번호 없음)
+      본문          <p>
+      강조          <strong>  (문단당 최대 1회, 문서 전체 5회 이내)
+      개조식        <ul> / 순서 있으면 <ol>, 한 단계까지 중첩 가능
+      표            <figure class="table">  캡션은 표 아래
+      그림          <figure class="fig">    캡션은 그림 아래
+      나란히 2개    <div class="fig-row"> 안에 figure.fig 두 개
+      차트          <figure class="fig"><div class="chart"><canvas data-chart='JSON'></canvas></div>
+      수식          <div class="eq">
+      코드          <pre>
+      메모          <p class="memo">
+      각주          본문에 <sup class="fn">1</sup>, 끝에 <ol class="footnotes">
+  - 표·그림 번호는 문서 전체에서 순서대로 매긴다 (표 1, 표 2 / 그림 1, 그림 2).
+    차트도 "그림"으로 번호를 매긴다. 본문에서 먼저 언급한 뒤 배치한다.
+
+  [차트 JSON] 색·글꼴은 자동. 색을 직접 지정하지 않는다.
+    공통   "x":"x축 이름 (단위)", "y":"y축 이름 (단위)"
+           "yMin":0, "yMax":1, "yLog":true   (선택)
+    꺾은선 {"type":"line", "labels":[...], "series":[{"name":"","data":[...]}]}
+           기준선은 계열에 "dash":true
+    막대   {"type":"bar", "labels":[...], "series":[...]}
+           계열 2개 이상 → 계열마다 대비되는 색
+           "highlight":"max" → 각 계열의 최댓값만 강조색, 나머지 회색
+           "highlight":2     → 각 계열의 해당 순서(0부터)만 강조
+           가로 막대는 "horizontal":true
+    산점도 {"type":"scatter", "series":[{"name":"","data":[[x,y],...]}]}
+    원형   {"type":"pie", "labels":[...], "series":[{"data":[...]}]}
+           가운데 빈 원형은 "donut":true. 조각은 6개 이하.
+    계열은 기본 4개. 적용·미적용 쌍을 비교할 때는 최대 8개.
+
+  [문체]
+  - 개조식은 부득이한 경우를 제외하고 명사로 끝맺는다. 서술형은 "~했다 / ~이다"로 통일. 존댓말 금지.
+  - 금지: "핵심 요약", "결론적으로", "흥미롭게도", "주목할 만한", "성공적으로",
+    "효과적으로", "~것으로 보입니다", 영어 소제목.
+  - 평가는 형용사 대신 숫자와 단위로 쓴다.
+  - 관찰한 사실과 해석을 같은 문장에 섞지 않는다.
+  - 모르는 것은 "미확인"이라고 쓴다.
+  - 자리표시 문구는 전부 실제 내용으로 바꾸고, 안 쓰는 요소는 지운다.
+================================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Noto Serif KR = 본명조(Source Han Serif)와 같은 글꼴. 본명조가 설치되지 않은 PC용 대체 -->
+<!-- Tinos = Times New Roman과 자간이 같은 대체 글꼴. TNR 없는 환경용 -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Tinos:wght@400;700&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #000000;
+    --accent: #7897b1;       /* 캡션, 강조 */
+    --rule: #d6d6d6;         /* 옅은 선 */
+    --wash: #f5f7fa;         /* 코드, 그림 자리 바탕 */
+    --head: "Times New Roman MT", "Times New Roman", "Tinos", Times,
+            "Source Han Serif KR", "Source Han Serif K", "Noto Serif KR", serif;
+    --body: "Source Han Serif KR", "Source Han Serif K", "본명조", "Noto Serif KR", serif;
+    --mono: "IBM Plex Mono", "D2Coding", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); }
+  body {
+    color: var(--ink);
+    font: 15.5px/1.8 var(--body);
+    -webkit-font-smoothing: antialiased;
+    word-break: keep-all;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 56px 16px 80px; }
+
+  /* ---------- 제목 블록 ---------- */
+  .title-block {
+    padding-bottom: 18px; margin-bottom: 40px;
+    border-bottom: 1.5px solid var(--ink);
+  }
+  .title-block h1 {
+    margin: 0; font-family: var(--head);
+    font-size: 28px; font-weight: 700; line-height: 1.35;
+  }
+  .title-block .subtitle {
+    margin: 6px 0 0; font-family: var(--head);
+    font-size: 18px; font-weight: 400;
+  }
+  .title-block .byline { margin: 18px 0 0; font-size: 13.5px; }
+  .title-block .byline span + span::before { content: "·"; margin: 0 8px; }
+
+  /* ---------- 제목 위계 ---------- */
+  h2 {
+    margin: 44px 0 14px; font-family: var(--head);
+    font-size: 21px; font-weight: 700; line-height: 1.45;
+  }
+  h3 {
+    margin: 30px 0 10px; font-family: var(--head);
+    font-size: 17.5px; font-weight: 700; line-height: 1.45;
+  }
+  h4 {
+    margin: 22px 0 6px; font-family: var(--body);
+    font-size: 15.5px; font-weight: 600;
+  }
+  h2 .num, h3 .num { margin-right: 0.45em; }
+  h2 + h3 { margin-top: 16px; }
+
+  /* ---------- 본문, 개조식 ---------- */
+  p { margin: 0 0 0.9em; text-align: justify; }
+  ul, ol { margin: 0 0 1em; padding-left: 1.4em; }
+  li { margin: 0.15em 0; }
+  li > ul, li > ol { margin: 0.2em 0 0.3em; }
+  ul ul > li { list-style-type: "– "; }
+  strong { font-weight: 700; color: #007fff; }
+
+  /* ---------- 표 ---------- */
+  figure { margin: 28px 0; }
+  figure.table figcaption { margin-top: 8px; margin-bottom: 0; text-align: center; }
+  table {
+    width: 100%; border-collapse: collapse;
+    font-size: 14px; line-height: 1.55;
+    font-variant-numeric: tabular-nums;
+  }
+  thead th {
+    font-weight: 600; text-align: center;
+    border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink);
+    padding: 7px 10px;
+  }
+  tbody td { padding: 6px 10px; border-bottom: 1px solid var(--rule); text-align: center; }
+  tbody tr:last-child td { border-bottom: 1.5px solid var(--ink); }
+  td.l, th.l { text-align: left; }
+  td.r, th.r { text-align: right; }
+  .table-note { margin-top: 6px; font-size: 12.5px; }
+
+  /* ---------- 그림 ---------- */
+  figure.fig img { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+  figure.fig figcaption { margin-top: 10px; text-align: center; }
+  .fig-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 28px 0; }
+  .fig-row figure { margin: 0; }
+  .placeholder {
+    display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 16 / 9; background: var(--wash);
+    border: 1px dashed var(--rule); font-size: 13px;
+  }
+
+  /* ---------- 차트 ---------- */
+  .chart { position: relative; height: 300px; }
+  .fig-row .chart { height: 240px; }
+
+  /* ---------- 캡션 ---------- */
+  figcaption { font-size: 13.5px; line-height: 1.6; color: var(--accent); text-align: left; }
+  figcaption .label { font-weight: 700; margin-right: 0.4em; }
+
+  /* ---------- 수식, 코드, 메모 ---------- */
+  .eq {
+    display: grid; grid-template-columns: 1fr auto; align-items: center;
+    margin: 18px 0; font-family: var(--head); font-style: italic; text-align: center;
+  }
+  .eq .eqno { font-style: normal; }
+  code { font: 0.85em var(--mono); }
+  pre {
+    margin: 14px 0 18px; padding: 12px 14px; overflow-x: auto;
+    background: var(--wash); border-left: 2px solid var(--ink);
+    font: 13px/1.6 var(--mono);
+  }
+  .memo {
+    margin: 16px 0; padding-left: 14px;
+    border-left: 2px solid var(--rule); font-size: 14.5px; text-align: left;
+  }
+
+  /* ---------- 각주 ---------- */
+  sup.fn { font-size: 0.7em; }
+  .footnotes {
+    margin-top: 48px; padding-top: 12px; border-top: 1px solid var(--ink);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 600px) {
+    main { padding-top: 32px; }
+    .fig-row { grid-template-columns: 1fr; }
+    .chart, .fig-row .chart { height: 250px; }
+    p { text-align: left; }
+  }
+  @media print {
+    main { width: 174mm; max-width: 100%; padding: 0; }
+    h2, h3, h4 { break-after: avoid; }
+    figure, .fig-row, table { break-inside: avoid; max-width: 100%; }
+    .fig-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fig-row > figure { min-width: 0; }
+    .chart { width: 100%; min-width: 0; }
+    canvas { max-width: 100% !important; }
+    table { table-layout: fixed; }
+    th, td { overflow-wrap: anywhere; }
+    @page { size: A4; margin: 20mm 18mm; }
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- 제목 블록 -->
+  <header class="title-block">
+    <h1>Title 제목</h1>
+    <p class="subtitle">Subtitle 부제목</p>
+    <p class="byline"><span>2026-00-00</span><span>작성자</span><span>과제명 또는 실험 번호</span></p>
+  </header>
+
+  <!-- 대제목 -->
+  <h2><span class="num">1.</span>Heading 대제목</h2>
+  <p>본문 단락. <strong>강조할 내용</strong>은 이렇게 표시한다.</p>
+
+  <!-- 소제목 -->
+  <h3><span class="num">1.1</span>Subheading 소제목</h3>
+  <p>본문 단락.</p>
+
+  <!-- 세부제목 -->
+  <h4>세부제목</h4>
+
+  <!-- 개조식 -->
+  <ul>
+    <li>개조식 항목</li>
+    <li>개조식 항목
+      <ul>
+        <li>하위 항목</li>
+        <li>하위 항목</li>
+      </ul>
+    </li>
+  </ul>
+
+  <!-- 순서 있는 개조식 -->
+  <ol>
+    <li>순서 항목</li>
+    <li>순서 항목</li>
+  </ol>
+
+  <h3><span class="num">1.2</span>소제목</h3>
+  <p>본문에서 표 1을 먼저 언급한다.</p>
+
+  <!-- 표: 캡션이 아래 -->
+  <figure class="table">
+    
+    <table>
+      <thead>
+        <tr><th class="l">항목</th><th>열</th><th>열</th><th>열</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="l">행</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+        <tr><td class="l">행</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+        <tr><td class="l">행</td><td>0.000</td><td>0.000</td><td>0.000</td></tr>
+      </tbody>
+    </table>
+<figcaption><span class="label">표 1.</span>표 캡션</figcaption>
+  </figure>
+
+  <h2><span class="num">2.</span>대제목</h2>
+  <p>본문에서 그림 1을 먼저 언급한다.</p>
+
+  <!-- 그림 1개: 캡션이 아래. .placeholder 를 <img src="파일경로" alt="설명"> 로 교체 -->
+  <figure class="fig">
+    <div class="placeholder">그림 자리</div>
+    <figcaption><span class="label">그림 1.</span>그림 캡션</figcaption>
+  </figure>
+
+  <!-- 그림 2개 나란히 -->
+  <div class="fig-row">
+    <figure class="fig">
+      <div class="placeholder">그림 자리</div>
+      <figcaption><span class="label">그림 2.</span>왼쪽 그림 캡션</figcaption>
+    </figure>
+    <figure class="fig">
+      <div class="placeholder">그림 자리</div>
+      <figcaption><span class="label">그림 3.</span>오른쪽 그림 캡션</figcaption>
+    </figure>
+  </div>
+
+  <h2><span class="num">3.</span>대제목</h2>
+  <p>본문에서 그림 4를 먼저 언급한다.</p>
+
+  <!-- 꺾은선 차트 -->
+  <figure class="fig">
+    <div class="chart"><canvas data-chart='{
+      "type": "line",
+      "labels": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      "series": [
+        {"name": "계열 A", "data": [1.00, 0.72, 0.58, 0.49, 0.44, 0.41, 0.39, 0.38, 0.37]},
+        {"name": "계열 B", "data": [1.00, 0.86, 0.70, 0.63, 0.55, 0.52, 0.47, 0.46, 0.44]},
+        {"name": "계열 C", "data": [1.00, 0.93, 0.81, 0.74, 0.69, 0.62, 0.60, 0.57, 0.55]},
+        {"name": "기준", "data": [0.50, 0.50, 0.50, 0.50, 0.50, 0.50, 0.50, 0.50, 0.50], "dash": true}
+      ],
+      "x": "x축 이름 (단위)",
+      "y": "y축 이름 (단위)"
+    }'></canvas></div>
+    <figcaption><span class="label">그림 4.</span>꺾은선 차트 캡션</figcaption>
+  </figure>
+
+  <!-- 막대: 계열 2개(대비 색) / 계열 1개(최댓값 강조) -->
+  <div class="fig-row">
+    <figure class="fig">
+      <div class="chart"><canvas data-chart='{
+        "type": "bar",
+        "labels": ["조건 1", "조건 2", "조건 3", "조건 4"],
+        "series": [
+          {"name": "계열 A", "data": [12, 19, 15, 22]},
+          {"name": "계열 B", "data": [10, 14, 17, 18]}
+        ],
+        "y": "y축 이름 (단위)"
+      }'></canvas></div>
+      <figcaption><span class="label">그림 5.</span>묶은 막대 차트 캡션</figcaption>
+    </figure>
+    <figure class="fig">
+      <div class="chart"><canvas data-chart='{
+        "type": "bar",
+        "labels": ["조건 1", "조건 2", "조건 3", "조건 4", "조건 5"],
+        "series": [
+          {"name": "계열 A", "data": [14, 11, 23, 17, 9]}
+        ],
+        "highlight": "max",
+        "y": "y축 이름 (단위)"
+      }'></canvas></div>
+      <figcaption><span class="label">그림 6.</span>최댓값 강조 막대 차트 캡션</figcaption>
+    </figure>
+  </div>
+
+  <!-- 산점도 / 원형 -->
+  <div class="fig-row">
+    <figure class="fig">
+      <div class="chart"><canvas data-chart='{
+        "type": "scatter",
+        "series": [
+          {"name": "계열 A", "data": [[1,2.1],[2,3.9],[3,6.2],[4,7.8],[5,10.1],[6,12.2]]},
+          {"name": "계열 B", "data": [[1,1.2],[2,2.8],[3,3.1],[4,4.9],[5,5.6],[6,7.0]]}
+        ],
+        "x": "x축 이름 (단위)",
+        "y": "y축 이름 (단위)"
+      }'></canvas></div>
+      <figcaption><span class="label">그림 7.</span>산점도 캡션</figcaption>
+    </figure>
+    <figure class="fig">
+      <div class="chart"><canvas data-chart='{
+        "type": "pie",
+        "labels": ["항목 A", "항목 B", "항목 C", "항목 D", "기타"],
+        "series": [{"data": [38, 24, 18, 12, 8]}]
+      }'></canvas></div>
+      <figcaption><span class="label">그림 8.</span>원형 차트 캡션</figcaption>
+    </figure>
+  </div>
+
+  <!-- 수식 -->
+  <div class="eq"><span>y = f(x)</span><span class="eqno">(1)</span></div>
+
+  <!-- 코드 -->
+  <pre>명령어 또는 코드</pre>
+
+  <!-- 메모 -->
+  <p class="memo">메모. 본문 흐름과 별개로 남겨 둘 내용.</p>
+
+  <p>각주가 필요한 문장.<sup class="fn">1</sup></p>
+
+  <!-- 각주 -->
+  <ol class="footnotes">
+    <li>각주 내용.</li>
+  </ol>
+
+</main>
+
+<!-- 차트 렌더러: 수정하지 않는다 -->
+<script>
+(function () {
+  if (!window.Chart) return;
+  var css = getComputedStyle(document.documentElement);
+  var v = function (n) { return css.getPropertyValue(n).trim(); };
+
+  // 차트 색: 밝고 서로 잘 구분되는 순서
+  var palette = ['#007fff', '#ff4d6d', '#ffb000', '#00b894', '#8e5cff', '#ff7a2f'];
+  var mute = '#c9ced6';      // 강조 막대 외 회색
+  var refLine = '#7a7a7a';   // 기준선
+  var ink = v('--ink'), rule = v('--rule');
+
+  Chart.defaults.font.family = v('--body');
+  Chart.defaults.font.size = 12.5;
+  Chart.defaults.color = ink;
+  Chart.defaults.animation = false;
+  Chart.defaults.maintainAspectRatio = false;
+
+  var tooltip = {
+    backgroundColor: '#ffffff', titleColor: ink, bodyColor: ink,
+    borderColor: rule, borderWidth: 1, padding: 8, cornerRadius: 0, boxPadding: 4
+  };
+  var legendLabels = function (style) {
+    return { usePointStyle: true, pointStyle: style, boxWidth: 18, boxHeight: 8, padding: 14, color: ink };
+  };
+  var axisTitle = function (t) { return { display: !!t, text: t || '', color: ink }; };
+
+  document.querySelectorAll('canvas[data-chart]').forEach(function (cv) {
+    var s;
+    try { s = JSON.parse(cv.dataset.chart); } catch (e) { console.error('차트 JSON 오류', e); return; }
+    var type = s.type || 'line';
+    var series = s.series || [];
+
+    /* ----- 원형 ----- */
+    if (type === 'pie') {
+      var d0 = series[0] || { data: [] };
+      new Chart(cv, {
+        type: s.donut ? 'doughnut' : 'pie',
+        plugins: [{
+          id: 'percentageLabels',
+          afterDatasetsDraw: function (chart) {
+            if (!s.showPercent) return;
+            var values = chart.data.datasets[0].data;
+            var sum = values.reduce(function (a, b) { return a + Number(b); }, 0);
+            if (!sum) return;
+            var ctx = chart.ctx;
+            ctx.save();
+            ctx.font = '600 13px ' + v('--body');
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            chart.getDatasetMeta(0).data.forEach(function (arc, i) {
+              if (!chart.getDataVisibility(i) || !Number(values[i])) return;
+              var point = arc.getCenterPoint();
+              var percent = Number(values[i]) / sum * 100;
+              ctx.fillText((Number.isInteger(percent) ? percent.toFixed(0) : percent.toFixed(1)) + '%', point.x, point.y);
+            });
+            ctx.restore();
+          }
+        }],
+        data: {
+          labels: s.labels,
+          datasets: [{
+            data: d0.data,
+            backgroundColor: d0.data.map(function (_, i) { return palette[i % palette.length]; }),
+            borderColor: '#ffffff', borderWidth: 2
+          }]
+        },
+        options: {
+          cutout: s.donut ? '58%' : 0,
+          layout: { padding: 4 },
+          plugins: {
+            legend: { position: 'right', labels: legendLabels('rect') },
+            tooltip: Object.assign({}, tooltip, {
+              callbacks: {
+                label: function (c) {
+                  var sum = c.dataset.data.reduce(function (a, b) { return a + b; }, 0);
+                  return ' ' + c.label + ': ' + c.raw + ' (' + (c.raw / sum * 100).toFixed(1) + '%)';
+                }
+              }
+            })
+          }
+        }
+      });
+      return;
+    }
+
+    /* ----- 꺾은선, 막대, 산점도 ----- */
+    var colorIdx = 0;
+    var datasets = series.map(function (d) {
+      var col = d.dash ? refLine : palette[(d.colorIndex !== undefined ? d.colorIndex : colorIdx++) % palette.length];
+      var ds = { label: d.name, borderColor: col, backgroundColor: col };
+
+      if (type === 'scatter') {
+        ds.data = d.data.map(function (p) { return { x: p[0], y: p[1] }; });
+        ds.pointRadius = 4; ds.pointHoverRadius = 6;
+        ds.backgroundColor = col + 'cc';
+      } else {
+        ds.data = d.data;
+      }
+      if (type === 'line') {
+        ds.borderWidth = d.dash ? 1.4 : 2.4;
+        ds.pointRadius = d.dash ? 0 : 3;
+        ds.pointBackgroundColor = '#ffffff';
+        ds.pointBorderWidth = 2;
+        ds.tension = 0;
+        ds.borderDash = (d.dash || d.dashed) ? [6, 4] : [];
+      }
+      if (type === 'bar') {
+        ds.borderWidth = 0; ds.maxBarThickness = 34;
+        if (s.highlight !== undefined) {
+          var hi = s.highlight === 'max'
+            ? d.data.indexOf(Math.max.apply(null, d.data))
+            : (s.highlight === 'min' ? d.data.indexOf(Math.min.apply(null, d.data)) : s.highlight);
+          ds.backgroundColor = d.data.map(function (_, i) { return i === hi ? col : mute; });
+        }
+      }
+      return ds;
+    });
+
+    var horizontal = type === 'bar' && s.horizontal;
+    var valueAxis = {
+      type: s.yLog ? 'logarithmic' : 'linear',
+      title: axisTitle(s.y),
+      grid: { color: rule, lineWidth: 0.8 },
+      border: { display: false },
+      ticks: { padding: 6 },
+      beginAtZero: type === 'bar'
+    };
+    if (s.yMin !== undefined) valueAxis.min = s.yMin;
+    if (s.yMax !== undefined) valueAxis.max = s.yMax;
+    var catAxis = {
+      type: type === 'scatter' ? 'linear' : 'category',
+      title: axisTitle(s.x),
+      grid: { display: false },
+      border: { color: ink, width: 1 },
+      ticks: { padding: 4 }
+    };
+
+    var single = datasets.length === 1;
+    new Chart(cv, {
+      type: type,
+      data: { labels: s.labels, datasets: datasets },
+      plugins: s.legendInside ? [{
+        id: 'insideLegend',
+        afterDraw: function (chart) {
+          var area = chart.chartArea;
+          if (!area) return;
+          var ctx = chart.ctx, columns = s.legendColumns || 4;
+          var legendWidth = (area.right - area.left - 16) * (s.legendWidthRatio || 1);
+          var cellWidth = legendWidth / columns;
+          var rowHeight = 21, top = area.top + 7, left = area.left + 8;
+          var rowCount = Math.ceil(chart.data.datasets.length / columns);
+          ctx.save();
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(left - 4, top - 3, legendWidth + 8, rowCount * rowHeight + 6);
+          chart.$insideLegendHits = [];
+          chart.data.datasets.forEach(function (dataset, i) {
+            var x = left + (i % columns) * cellWidth;
+            var y = top + Math.floor(i / columns) * rowHeight + 10;
+            var label = dataset.label.replace(/\s*\(미확인\)$/, '').replace(' · ', ' ');
+            var fontSize = 11;
+            ctx.font = fontSize + 'px ' + v('--body');
+            var available = Math.max(20, cellWidth - 25);
+            if (ctx.measureText(label).width > available) {
+              fontSize = Math.max(7, fontSize * available / ctx.measureText(label).width);
+              ctx.font = fontSize + 'px ' + v('--body');
+            }
+            var visible = chart.isDatasetVisible(i);
+            ctx.strokeStyle = visible ? dataset.borderColor : mute;
+            ctx.lineWidth = 2;
+            ctx.setLineDash(dataset.borderDash || []);
+            ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 15, y); ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = visible ? ink : mute;
+            ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+            ctx.fillText(label, x + 21, y);
+            chart.$insideLegendHits.push({ x: x, y: y - 10, w: cellWidth, h: rowHeight, index: i });
+          });
+          ctx.restore();
+        }
+      }] : [],
+      options: {
+        indexAxis: horizontal ? 'y' : 'x',
+        onClick: s.legendInside ? function (event, elements, chart) {
+          var hits = chart.$insideLegendHits || [];
+          var hit = hits.find(function (h) { return event.x >= h.x && event.x <= h.x + h.w && event.y >= h.y && event.y <= h.y + h.h; });
+          if (hit) { chart.setDatasetVisibility(hit.index, !chart.isDatasetVisible(hit.index)); chart.update(); }
+        } : undefined,
+        layout: { padding: { top: 4, right: 8 } },
+        plugins: {
+          legend: {
+            display: !single && !s.legendInside, position: 'top', align: 'end',
+            labels: Object.assign(legendLabels(type === 'line' ? 'line' : (type === 'bar' ? 'rect' : 'circle')), s.highlight !== undefined ? {
+              generateLabels: function (chart) {
+                return Chart.defaults.plugins.legend.labels.generateLabels(chart).map(function (label) {
+                  var color = chart.data.datasets[label.datasetIndex].borderColor;
+                  label.fillStyle = color;
+                  label.strokeStyle = color;
+                  return label;
+                });
+              }
+            } : {})
+          },
+          tooltip: tooltip
+        },
+        scales: horizontal ? { x: valueAxis, y: catAxis } : { x: catAxis, y: valueAxis }
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
