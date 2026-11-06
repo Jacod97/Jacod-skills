@@ -18,8 +18,8 @@
 
 ## 산출 문서
 
-- `docs/planning-output.md`: 파악한 기존 구조, 변경 계획
-- `docs/task/01_XXXX.md`: 작업 계획서 1개. 규모가 커서 나눠야 하면 나눌지 먼저 묻는다
+- `docs/planning-output.md`: 양식 `assets/planning-output-update.md`
+- `docs/task/01_XXXX.md`: 양식 `assets/task.md`. 1개가 기본. 규모가 커서 나눠야 하면 나눌지 먼저 묻는다
 
 ## 점검
 

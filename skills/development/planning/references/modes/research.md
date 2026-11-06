@@ -15,15 +15,15 @@
    - 출력: print로 볼지, `.csv`·`.json` 같은 파일로 남길지
    - 비교 대상: 연구 계획서에서 무엇을 비교하는지(모델, 가중치, 데이터 처리 방식 등) 파악하고, 그것을 쉽게 바꿔가며 실행할 방법을 제안한다. 필요하면 Hydra 같은 실험 설정 도구를 제안한다
 2. **산출 파일**
-   - 생길 파일·디렉토리와 각 역할을 한 줄씩 (예: `train.py`는 학습 로직, `main.py`에서 호출)
+   - 생길 파일·디렉토리, 각 역할, 담길 모듈(함수·클래스)과 호출 관계
    - 비교 대상이 바뀌는 부분만 모듈로 나누고, 나머지는 단순하게 둔다
 3. **작업 계획**
    - 무엇부터 구현할지 순서를 정하고 task로 나눈다
 
 ## 산출 문서
 
-- `docs/planning-output.md`: CLI 설계, 산출 파일 설명
-- `docs/task/01_XXXX.md`, `02_XXXX.md`, ...: task별 작업 계획서
+- `docs/planning-output.md`: 양식 `assets/planning-output-research.md`
+- `docs/task/01_XXXX.md`, `02_XXXX.md`, ...: 양식 `assets/task.md`
 
 ## 점검
 

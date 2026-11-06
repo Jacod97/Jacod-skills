@@ -12,6 +12,7 @@ references/core.md           모든 모드 공통 규칙
 references/modes/research.md 리서치
 references/modes/update.md   업데이트
 references/modes/build.md    빌드
+assets/                      산출 문서 양식 (planning-output 모드별 3개, task)
 ```
 
 - 같은 항목에서 규칙이 부딪치면 모드 파일이 이긴다.
